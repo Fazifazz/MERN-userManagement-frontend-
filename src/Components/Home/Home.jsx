@@ -1,23 +1,31 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { addLoggedUser } from "../../slices/LoggedUser";
 
 function Home() {
-  const [user, setUser] = useState({});
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   axios.defaults.withCredentials = true;
+  const user = useSelector((state)=> state.loggedUsers)
 
-  useEffect(()=>{
-    axios.get('http://localhost:4000/userHome')
-    .then(res=>{
-      if(res.data.success){
-        setUser(res.data.user)
-        navigate('/home')
-      }else   {
-        navigate('/login')
-      }
-    })
-  },[])
+  useEffect(() => {
+    console.log('hy, iam inside')
+    axios
+      .get("http://localhost:4000/userHome")
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.success) {
+          console.log(res.data.user);
+          dispatch(addLoggedUser(res.data.user));
+          navigate("/home");
+        } else {
+          navigate("/login");
+        }
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   const cardStyle = {
     borderRadius: '15px',
@@ -83,7 +91,7 @@ function Home() {
                       height: "100%",
                       objectFit: "cover",
                     }}
-                    src={user.image}
+                    src={`http://localhost:4000/profile/${user.profile}`}
                     alt="Profile"
                   />
                 </div>
