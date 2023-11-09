@@ -5,7 +5,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 function EditUser() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = location.state;
+  let user;
+  if(location.state){
+    const {userDetails} = location.state
+    user = userDetails
+  }
   axios.defaults.withCredentials = true;
 
   const [name, setName] = useState("");
@@ -14,8 +18,20 @@ function EditUser() {
   const [email,setEmail] =useState('')
   const [error, setError] = useState("");
 
-  console.log(user);
+
   useEffect(() => {
+    axios
+    .get("http://localhost:4000/checkAdminLogged")
+    .then((res) => {
+      console.log(res.data);
+      if (res.data.success) {
+        navigate("/editUser");
+      } else {
+        navigate("/adminlogin");
+      }
+    })
+    .catch((err) => console.log(err));
+
     if (user) {
       setName(user[0].name);
       setEmail(user[0].email)

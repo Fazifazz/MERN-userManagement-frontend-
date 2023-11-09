@@ -1,46 +1,53 @@
-import React, { useState,useEffect } from 'react';
-import './Register.css'
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios'
+import React, { useState, useEffect } from "react";
+import "./Register.css";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Register = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [mobile, setMobile] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const handleRegister = async(e) => {
-    e.preventDefault()
+  axios.defaults.withCredentials = true;
+  useEffect(() => {
+    axios
+      .get("http://localhost:4000/checkLogged")
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.success) {
+          console.log(res.data.user);
+          navigate("/home");
+        } else {
+          navigate("/register");
+        }
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
-    await axios.post('http://localhost:4000/register',{name,email,mobile,password}).then((response)=>{
-      if(response.data.success){
-        console.log(response.data)
-        navigate('/login')
-      }else{
-        navigate('/register')
-        setError(response.data.error)
-           setTimeout(() => {
-          setError("");
-        }, 2000);
-      }
+  const handleRegister = async (e) => {
+    e.preventDefault();
 
-    }).catch((err)=>{
-      console.log(err)
-    })
+    await axios
+      .post("http://localhost:4000/register", { name, email, mobile, password })
+      .then((response) => {
+        if (response.data.success) {
+          console.log(response.data);
+          navigate("/login");
+        } else {
+          navigate("/register");
+          setError(response.data.error);
+          setTimeout(() => {
+            setError("");
+          }, 2000);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
-
-  useEffect(()=>{
-    axios.get('http://localhost:4000/register')
-    .then(res=>{
-      if(res.data.success){
-        navigate('/register')
-      }else{
-        navigate('/home')
-      }
-    })
-  },[])
 
   return (
     <div className="container">
@@ -88,7 +95,7 @@ const Register = () => {
         </a>
       </form>
       <p>
-        Already have an account? <Link to='/login'>Login</Link>
+        Already have an account? <Link to="/login">Login</Link>
       </p>
     </div>
   );

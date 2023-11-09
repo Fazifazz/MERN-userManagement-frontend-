@@ -7,13 +7,12 @@ import { addLoggedUser } from "../../slices/LoggedUser";
 function Home() {
   const navigate = useNavigate();
   const dispatch = useDispatch()
-  axios.defaults.withCredentials = true;
   const user = useSelector((state)=> state.loggedUsers)
-
+  
+  axios.defaults.withCredentials = true;
   useEffect(() => {
-    console.log('hy, iam inside')
     axios
-      .get("http://localhost:4000/userHome")
+      .get("http://localhost:4000/checkLogged")
       .then((res) => {
         console.log(res.data);
         if (res.data.success) {
@@ -54,14 +53,14 @@ function Home() {
   }
 
   const handleEditProfile = ()=>{
-    navigate('/editProfile',{state:{user}})
+    navigate('/editProfile',{state:{userDetails:user}})
   }
 
   return (
     <div>
       <nav className="navbar navbar-expand-lg bg-light">
         <div className="container-fluid">
-          <a className="navbar-brand text-dark" href="/home">
+          <a className="navbar-brand text-dark" onClick={()=>navigate('/home')}>
             Welcome {user.name}
           </a>
           <a type="button" className="btn btn-danger" onClick={handleLogout}>Logout</a>

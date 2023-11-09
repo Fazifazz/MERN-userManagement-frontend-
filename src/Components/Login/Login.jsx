@@ -10,6 +10,22 @@ const Login = () => {
   const navigate = useNavigate();
 
   axios.defaults.withCredentials = true;
+  useEffect(() => {
+    axios
+      .get("http://localhost:4000/checkLogged")
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.success) {
+          console.log(res.data.user);
+          
+          navigate("/home");
+        } else {
+          navigate("/login");
+        }
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   const handleLogin = async (e) => {
     await axios
       .post("http://localhost:4000/login", { email, password })
@@ -27,16 +43,6 @@ const Login = () => {
         }
       });
   };
-
-  useEffect(() => {
-    axios.get("http://localhost:4000/checkLoggin").then((res) => {
-      if (res.data.success) {
-        navigate("/login");
-      } else {
-        navigate("/home");
-      }
-    }); 
-  }, []);
 
   return (
     <div className="container">
@@ -61,7 +67,7 @@ const Login = () => {
             className="form-control"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-          />    
+          />
         </div>
         <a type="button" className="btn btn-primary mb-2" onClick={handleLogin}>
           Login

@@ -6,14 +6,33 @@ function EditProfile() {
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState(null);
+  const [error, setError] = useState("");
   const [preview, setPreview] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = location.state;
   axios.defaults.withCredentials = true;
+  let user;
+  if (location.state) {
+    const { userDetails } = location.state;
+    user = userDetails;
+  }
 
   useEffect(() => {
+    axios
+      .get("http://localhost:4000/checkLogged")
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.success) {
+          console.log(res.data.user);
+
+          navigate("/editProfile");
+        } else {
+          navigate("/login");
+        }
+      })
+      .catch((err) => console.log(err));
+
     if (user) {
       setName(user.name);
       setMobile(user.mobile);
@@ -28,8 +47,31 @@ function EditProfile() {
     const selectedImage = document.getElementById("upload");
     const image = selectedImage.files[0];
 
+    if (name.length === 0) {
+      setError("name is required");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+      return;
+    }
+    if (mobile.length < 10 || mobile.length > 10) {
+      console.log(mobile.length);
+      setError("mobile is invalid or must contaion 10 digits");
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+      return;
+    }
     if (image) {
-      data.append("profile", image);
+      if (image.type.startsWith("image")) {
+        data.append("profile", image);
+      } else {
+        setError("Only images are allowed to upload");
+        setTimeout(() => {
+          setError("");
+        }, 2000);
+        return;
+      }
     }
     data.append("name", name);
     data.append("mobile", mobile);
@@ -98,6 +140,7 @@ function EditProfile() {
                     type="file"
                     name="profile"
                     id="upload"
+                    accept="image/*"
                     onChange={handlePreview}
                   />
                   <br />
@@ -122,6 +165,7 @@ function EditProfile() {
                   </div>
                 </div>
               )}
+              {error && <p className="text-danger">{error}</p>}
 
               <input
                 type="submit"
@@ -131,7 +175,7 @@ function EditProfile() {
               <br />
               <a
                 type="button"
-                onClick={() => window.history.back()}
+                onClick={() => navigate("/home")}
                 className="btn bg-warning-subtle mt-2"
               >
                 Cancel

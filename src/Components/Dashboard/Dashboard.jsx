@@ -2,26 +2,30 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { addUser, deleteUser, clearUsers,searchUser } from "../../slices/userSlice";
+import {
+  addUser,
+  clearUsers,
+  searchUser,
+} from "../../slices/userSlice";
 import { FaSignOutAlt } from "react-icons/fa";
 
 function Dashboard() {
   const navigate = useNavigate("");
   const dispatch = useDispatch();
   const [error, setError] = useState("");
-  const [searchItem,setSearch]  = useState('')
+  const [searchItem, setSearch] = useState("");
   axios.defaults.withCredentials = true;
   const users = useSelector((state) => state.users);
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/dashboard")
+      .get("http://localhost:4000/checkAdminLogged")
       .then((res) => {
         console.log(res.data);
         if (res.data.success) {
           navigate("/dashboard");
         } else {
-          navigate("/adminLogin");
+          navigate("/adminlogin");
         }
       })
       .catch((err) => console.log(err));
@@ -46,24 +50,25 @@ function Dashboard() {
       }
     });
   };
-  const handleDelete = (id)=>{
-    axios.post('http://localhost:4000/deleteUser',{userId:id})
-    .then(res=>{
-        if(res.data.success){
+  const handleDelete = (id) => {
+    axios
+      .post("http://localhost:4000/deleteUser", { userId: id })
+      .then((res) => {
+        if (res.data.success) {
           dispatch(clearUsers());
           dispatch(addUser(res.data.users));
-          navigate('/dashboard')
-        }else{
-            console.log('delete failed')
-            navigate('/dashboard')
+          navigate("/dashboard");
+        } else {
+          console.log("delete failed");
+          navigate("/dashboard");
         }
-    })
-  }
+      });
+  };
 
-  const handleSearch = ()=>{
-    dispatch(searchUser(searchItem))
-  }
-  const handleClearSearch = ()=>{
+  const handleSearch = () => {
+    dispatch(searchUser(searchItem));
+  };
+  const handleClearSearch = () => {
     axios.get("http://localhost:4000/getUsers").then((res) => {
       if (res.data.success && res.data.users) {
         dispatch(clearUsers());
@@ -72,14 +77,14 @@ function Dashboard() {
         setError("No users");
       }
     });
-  }
+  };
 
-  const EditUser  =  (id)=>{
-    const user = users.filter((user)=>user._id===id)
-    if(user){
-      navigate('/editUser',{state:{user}})
+  const EditUser = (id) => {
+    const user = users.filter((user) => user._id === id);
+    if (user) {
+      navigate("/editUser", { state: { userDetails:user } });
     }
-  }
+  };
 
   return (
     <div>
@@ -102,14 +107,22 @@ function Dashboard() {
                 type="search"
                 name="q"
                 value={searchItem}
-                onChange={(e)=>setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search user"
                 className="form-control rounded-pill"
               />
-              <a type="button" className="btn btn-success rounded-pill" onClick={handleSearch}>
+              <a
+                type="button"
+                className="btn btn-success rounded-pill"
+                onClick={handleSearch}
+              >
                 search
               </a>
-              <a type="submit" className="btn btn-outline-success rounded-pill" onClick={handleClearSearch}>
+              <a
+                type="submit"
+                className="btn btn-outline-success rounded-pill"
+                onClick={handleClearSearch}
+              >
                 clear
               </a>
               <a className="btn ms-2" onClick={handleLogout}>
@@ -141,10 +154,18 @@ function Dashboard() {
                   <td>{user.isVerified ? "yes" : "no"}</td>
                   <td>
                     <div>
-                      <a type="button" className="btn btn-primary w-25 mr-5" onClick={()=>EditUser(user._id)}>
+                      <a
+                        type="button"
+                        className="btn btn-primary w-25 mr-5"
+                        onClick={() => EditUser(user._id)}
+                      >
                         Edit
                       </a>
-                      <a type="button" className="btn btn-danger w-25" onClick={()=>handleDelete(user._id)}>
+                      <a
+                        type="button"
+                        className="btn btn-danger w-25"
+                        onClick={() => handleDelete(user._id)}
+                      >
                         Delete
                       </a>
                     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -14,7 +14,22 @@ const CreateUser = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch()
 
-  const handleAddUser = async (e) => {
+  axios.defaults.withCredentials = true; 
+  useEffect(()=>{
+    axios
+      .get("http://localhost:4000/checkAdminLogged")
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.success) {
+          navigate("/createUser");
+        } else {
+          navigate("/adminlogin");
+        }
+      })
+      .catch((err) => console.log(err));
+  },[])
+
+  const handleAddUser = (e) => {
     e.preventDefault();
     axios.post('http://localhost:4000/createUser',{name,email,mobile,password,verify})
     .then(res=>{
@@ -33,6 +48,8 @@ const CreateUser = () => {
       }
     })
   };
+
+
 
   return (
     <div className="container">
@@ -82,11 +99,26 @@ const CreateUser = () => {
               type="radio"
               name="is_varified"
               id="verify"
-              value={verify}
-              onChange={() => setVerify(!verify)}
+              checked={verify}
+              onChange={() => setVerify(true)}
             />
             <label class="form-check-label" for="verify">
               Verify
+            </label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="is_varified"
+              id="verify"
+              checked={!verify}
+              onChange={() => setVerify(false)}
+            />
+            <label class="form-check-label" for="verify">
+              Not Verify
             </label>
           </div>
         </div>
@@ -95,8 +127,7 @@ const CreateUser = () => {
         </a>
       </form>
       <a
-        type="button"
-        className="btn btn-warning"
+        className="btn btn-warning mt-2"
         onClick={() => navigate("/dashboard")}
       >
         Back
